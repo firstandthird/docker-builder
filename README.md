@@ -6,7 +6,6 @@ Build a docker image from a github repo
 ```sh
 docker run \
   --rm \
-  -it \
   -e USER=[github user] \
   -e REPO=[github repo] \
   -e TOKEN=[github token - optional] \

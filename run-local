@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+USER=$1
+REPO=$2
+TOKEN=$3
+
+docker run \
+  --rm \
+  -it \
+  -e USER=$USER \
+  -e REPO=$REPO \
+  -e TOKEN=$TOKEN \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v $PWD/builder:/builder \
+  firstandthird/builder

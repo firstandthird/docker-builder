@@ -18,6 +18,10 @@ if [[ -z "$BRANCH" ]]; then
   BRANCH="master"
 fi
 
+if [[ -z "$DOCKERFILE" ]]; then
+  DOCKERFILE=Dockerfile
+fi
+
 REPOPATH="${REPOS}/${USER}_${REPO}"
 
 if [[ ! -d "$REPOPATH" ]]; then
@@ -31,7 +35,7 @@ git reset --hard --quiet origin/${BRANCH}
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 IMAGE="${USER}_${REPO}_${BRANCH}:${COMMIT}"
-IMAGE_ID=$(docker build . --quiet -t $IMAGE)
+IMAGE_ID=$(docker build . --quiet -f $DOCKERFILE -t $IMAGE)
 
 if [[ "$?" != 0 ]]; then
   echo "error building"

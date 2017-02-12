@@ -51,10 +51,14 @@ fi
 if [[ "$PUSH" == 1 ]]; then
   if [[ -n "$DOCKERUSER" ]]; then
     DOCKER_IMAGE="${REGISTRY:+ ${REGISTRY}/}${DOCKERUSER}/${REPO}:${COMMIT}"
-    docker tag $IMAGE $DOCKER_IMAGE
+    docker tag $IMAGE $DOCKER_IMAGE > /dev/null
     IMAGE=$DOCKER_IMAGE
   fi
-  docker push $IMAGE
+  docker push $IMAGE > /dev/null
+  if [[ "$?" != 0 ]]; then
+    echo "Push failed"
+    exit 1
+  fi
 fi
 
 echo $IMAGE

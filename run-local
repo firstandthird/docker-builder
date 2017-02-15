@@ -8,6 +8,7 @@ docker run \
   -e TOKEN=$TOKEN \
   -e DOCKERUSER=$DOCKERUSER \
   -e REGISTRY=$REGISTRY \
+  -e DEBUG=$DEBUG \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \

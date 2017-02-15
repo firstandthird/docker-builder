@@ -82,6 +82,7 @@ if [[ "$PUSH" == 1 ]]; then
     echo "Push failed"
     exit 1
   fi
+  IMAGE=$DOCKER_IMAGE
 fi
 
 log "complete: $IMAGE"

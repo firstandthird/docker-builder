@@ -65,14 +65,19 @@ fi
 
 
 if [[ "$PUSH" == 1 ]]; then
-  if [[ -n "$DOCKERUSER" ]]; then
-    DOCKER_IMAGE="${REGISTRY:+ ${REGISTRY}/}${DOCKERUSER}/${REPO}:${COMMIT}"
-    log "tagging image $DOCKER_IMAGE"
-    docker tag $IMAGE $DOCKER_IMAGE > /dev/null
-    IMAGE=$DOCKER_IMAGE
+  DOCKER_IMAGE=$IMAGE
+  if [[ -n "$DOCKERREPO" ]]; then
+    DOCKER_IMAGE=${DOCKERREPO}:${COMMIT}
+    log "using docker repo: ${DOCKER_IMAGE}"
   fi
-  log "pushing $IMAGE"
-  docker push $IMAGE > /dev/null
+  if [[ -n "$REGISTRY" ]]; then
+    log "using registry: $REGISTRY"
+    DOCKER_IMAGE="${REGISTRY}/${DOCKER_IMAGE}"
+  fi
+  log "tagging image $DOCKER_IMAGE"
+  docker tag $IMAGE $DOCKER_IMAGE > /dev/null
+  log "pushing $DOCKER_IMAGE"
+  docker push $DOCKER_IMAGE > /dev/null
   if [[ "$?" != 0 ]]; then
     echo "Push failed"
     exit 1

@@ -56,7 +56,7 @@ EXISTING=$(docker images -q $IMAGE 2> /dev/null)
 
 if [[ "$EXISTING" == "" ]]; then
   log "building $IMAGE with $DOCKERFILE"
-  IMAGE_ID=$(docker build . --quiet -f $DOCKERFILE -t $IMAGE)
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE .)
   if [[ "$?" != 0 ]]; then
     echo "error building"
     echo $IMAGE_ID

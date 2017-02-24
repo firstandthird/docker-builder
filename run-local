@@ -9,6 +9,7 @@ docker run \
   -e DOCKERREPO=$DOCKERREPO \
   -e REGISTRY=$REGISTRY \
   -e DEBUG=$DEBUG \
+  -e PUSH=$PUSH \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \

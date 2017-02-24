@@ -22,9 +22,12 @@ if [[ -z "$DOCKERFILE" ]]; then
   DOCKERFILE=Dockerfile
 fi
 
-PUSH=0
-if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
-  PUSH=1
+if [[ -z "$PUSH" ]]; then
+  if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
+    PUSH=1
+  else
+    PUSH=0
+  fi
 fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"

@@ -65,7 +65,7 @@ log "checking out ${BRANCH}"
 git reset --hard --quiet origin/${BRANCH}
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
-IMAGE="${USER}/${REPO}"
+IMAGE="${REPO}"
 log "checking if ${IMAGE}:$COMMIT exists"
 EXISTING=$(docker images -q $IMAGE:$COMMIT 2> /dev/null)
 
@@ -82,16 +82,10 @@ else
 fi
 
 if [[ "$PUSH" == 1 ]]; then
-  if [[ -n "$REGISTRY_IMAGE" ]]; then
-    log "using docker repo: ${REGISTRY_IMAGE}"
-  else
-    REGISTRY_IMAGE=$IMAGE
-  fi
   if [[ -n "$REGISTRY" ]]; then
     log "using registry: $REGISTRY"
-    REGISTRY_IMAGE="${REGISTRY}/${REGISTRY_IMAGE}"
+    REGISTRY_IMAGE="${REGISTRY}/${IMAGE}"
   fi
-  echo $IMAGE
 
   log "tagging image $REGISTRY_IMAGE:$COMMIT"
   docker tag $IMAGE:$COMMIT $REGISTRY_IMAGE:$COMMIT > /dev/null

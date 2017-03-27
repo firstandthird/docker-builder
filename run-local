@@ -11,8 +11,8 @@ docker run \
   -e DEBUG=$DEBUG \
   -e PUSH=$PUSH \
   -e PUSH_LATEST=$PUSH_LATEST \
+  -e DOCKER_AUTH=$DOCKER_AUTH \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \
-  -v /home/ubuntu/.docker:/root/.docker \
   firstandthird/builder

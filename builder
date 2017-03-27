@@ -22,6 +22,27 @@ if [[ -z "$DOCKERFILE" ]]; then
   DOCKERFILE=Dockerfile
 fi
 
+log() {
+  if [[ "$DEBUG" == "1" ]]; then
+    echo $@
+  fi
+}
+
+if [[ -n "$DOCKER_AUTH" ]]; then
+  mkdir -p /root/.docker
+  CONFIG_FILE=/root/.docker/config.json
+  log "Using DOCKER_AUTH"
+  cat > $CONFIG_FILE <<- EOM
+{
+  "auths": {
+    "https://index.docker.io/v1/": {
+      "auth": "$DOCKER_AUTH"
+    }
+  }
+}
+EOM
+fi
+
 if [[ -z "$PUSH" ]]; then
   if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
     PUSH=1
@@ -31,12 +52,6 @@ if [[ -z "$PUSH" ]]; then
 fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"
-
-log() {
-  if [[ "$DEBUG" == "1" ]]; then
-    echo $@
-  fi
-}
 
 if [[ ! -d "$REPOPATH" ]]; then
   git clone --quiet https://token:${TOKEN}@github.com/${USER}/${REPO}.git $REPOPATH

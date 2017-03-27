@@ -50,13 +50,13 @@ log "checking out ${BRANCH}"
 git reset --hard --quiet origin/${BRANCH}
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
-IMAGE="${USER}/${REPO}:${COMMIT}"
-log "checking if ${IMAGE} exists"
-EXISTING=$(docker images -q $IMAGE 2> /dev/null)
+IMAGE="${USER}/${REPO}"
+log "checking if ${IMAGE}:$COMMIT exists"
+EXISTING=$(docker images -q $IMAGE:$COMMIT 2> /dev/null)
 
 if [[ "$EXISTING" == "" ]]; then
-  log "building $IMAGE with $DOCKERFILE"
-  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE .)
+  log "building $IMAGE:$COMMIT with $DOCKERFILE"
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$COMMIT .)
   if [[ "$?" != 0 ]]; then
     echo "error building"
     echo $IMAGE_ID
@@ -66,26 +66,40 @@ else
   log "image exists, skipping build"
 fi
 
-
 if [[ "$PUSH" == 1 ]]; then
-  DOCKER_IMAGE=$IMAGE
-  if [[ -n "$DOCKERREPO" ]]; then
-    DOCKER_IMAGE=${DOCKERREPO}:${COMMIT}
-    log "using docker repo: ${DOCKER_IMAGE}"
+  if [[ -n "$REGISTRY_IMAGE" ]]; then
+    log "using docker repo: ${REGISTRY_IMAGE}"
+  else
+    REGISTRY_IMAGE=$IMAGE
   fi
   if [[ -n "$REGISTRY" ]]; then
     log "using registry: $REGISTRY"
-    DOCKER_IMAGE="${REGISTRY}/${DOCKER_IMAGE}"
+    REGISTRY_IMAGE="${REGISTRY}/${REGISTRY_IMAGE}"
   fi
-  log "tagging image $DOCKER_IMAGE"
-  docker tag $IMAGE $DOCKER_IMAGE > /dev/null
-  log "pushing $DOCKER_IMAGE"
-  docker push $DOCKER_IMAGE > /dev/null
+  echo $IMAGE
+
+  log "tagging image $REGISTRY_IMAGE:$COMMIT"
+  docker tag $IMAGE:$COMMIT $REGISTRY_IMAGE:$COMMIT > /dev/null
+
+  log "pushing $REGISTRY_IMAGE:$COMMIT"
+  docker push $REGISTRY_IMAGE:$COMMIT > /dev/null
+
   if [[ "$?" != 0 ]]; then
     echo "Push failed"
     exit 1
   fi
-  IMAGE=$DOCKER_IMAGE
+  if [[ -n "$PUSH_LATEST" ]]; then
+    log "tagging image $REGISTRY_IMAGE:latest"
+    docker tag $IMAGE:$COMMIT $REGISTRY_IMAGE:latest > /dev/null
+
+    log "pushing $REGISTRY_IMAGE:latest"
+    docker push $REGISTRY_IMAGE:latest > /dev/null
+    if [[ "$?" != 0 ]]; then
+      echo "Push failed"
+      exit 1
+    fi
+  fi
+  IMAGE=$REGISTRY_IMAGE
 fi
 
 log "complete: $IMAGE"

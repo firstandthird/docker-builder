@@ -6,10 +6,11 @@ docker run \
   -e USER=$USER \
   -e REPO=$REPO \
   -e TOKEN=$TOKEN \
-  -e DOCKERREPO=$DOCKERREPO \
+  -e REGISTRY_IMAGE=$REGISTRY_IMAGE \
   -e REGISTRY=$REGISTRY \
   -e DEBUG=$DEBUG \
   -e PUSH=$PUSH \
+  -e PUSH_LATEST=$PUSH_LATEST \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \

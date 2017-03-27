@@ -12,6 +12,7 @@ docker run \
   -e PUSH=$PUSH \
   -e PUSH_LATEST=$PUSH_LATEST \
   -e DOCKER_AUTH=$DOCKER_AUTH \
+  -e TAG=$TAG \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \

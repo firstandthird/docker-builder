@@ -63,15 +63,17 @@ log "fetching from repo"
 git fetch --quiet
 log "checking out ${BRANCH}"
 git reset --hard --quiet origin/${BRANCH}
-COMMIT=$(git log --pretty=format:"%h" -n 1)
+if [[ -z "$TAG" ]]; then
+  TAG=$(git log --pretty=format:"%h" -n 1)
+fi
 
 IMAGE="${REPO}"
-log "checking if ${IMAGE}:$COMMIT exists"
-EXISTING=$(docker images -q $IMAGE:$COMMIT 2> /dev/null)
+log "checking if ${IMAGE}:$TAG exists"
+EXISTING=$(docker images -q $IMAGE:$TAG 2> /dev/null)
 
 if [[ "$EXISTING" == "" ]]; then
-  log "building $IMAGE:$COMMIT with $DOCKERFILE"
-  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$COMMIT .)
+  log "building $IMAGE:$TAG with $DOCKERFILE"
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$TAG .)
   if [[ "$?" != 0 ]]; then
     echo "error building"
     echo $IMAGE_ID
@@ -87,11 +89,11 @@ if [[ "$PUSH" == 1 ]]; then
     REGISTRY_IMAGE="${REGISTRY}/${IMAGE}"
   fi
 
-  log "tagging image $REGISTRY_IMAGE:$COMMIT"
-  docker tag $IMAGE:$COMMIT $REGISTRY_IMAGE:$COMMIT > /dev/null
+  log "tagging image $REGISTRY_IMAGE:$TAG"
+  docker tag $IMAGE:$TAG $REGISTRY_IMAGE:$TAG > /dev/null
 
-  log "pushing $REGISTRY_IMAGE:$COMMIT"
-  docker push $REGISTRY_IMAGE:$COMMIT > /dev/null
+  log "pushing $REGISTRY_IMAGE:$TAG"
+  docker push $REGISTRY_IMAGE:$TAG > /dev/null
 
   if [[ "$?" != 0 ]]; then
     echo "Push failed"
@@ -99,7 +101,7 @@ if [[ "$PUSH" == 1 ]]; then
   fi
   if [[ -n "$PUSH_LATEST" ]]; then
     log "tagging image $REGISTRY_IMAGE:latest"
-    docker tag $IMAGE:$COMMIT $REGISTRY_IMAGE:latest > /dev/null
+    docker tag $IMAGE:$TAG $REGISTRY_IMAGE:latest > /dev/null
 
     log "pushing $REGISTRY_IMAGE:latest"
     docker push $REGISTRY_IMAGE:latest > /dev/null

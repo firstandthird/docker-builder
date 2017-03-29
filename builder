@@ -114,5 +114,5 @@ if [[ "$PUSH" == 1 ]]; then
 fi
 
 log "complete: $IMAGE"
-echo $IMAGE
+echo $IMAGE:$TAG
 

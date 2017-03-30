@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SECONDS=0
 if [[ -z "$REPOS" ]]; then
   REPOS=/repos
 fi
@@ -114,5 +115,7 @@ if [[ "$PUSH" == 1 ]]; then
 fi
 
 log "complete: $IMAGE"
+DURATION=$SECONDS
+log "finished in $SECONDS seconds"
 echo $IMAGE:$TAG
 

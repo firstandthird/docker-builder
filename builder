@@ -29,6 +29,22 @@ log() {
   fi
 }
 
+slack() {
+  if [[ -n "$SLACK_HOOK" ]]; then
+    local message=$1
+    local username="${SLACK_NAME:-docker-builder}"
+    local emoji="${SLACK_EMOJI:-:floppy_disk:}"
+    local channel=$SLACK_CHANNEL
+    curl -X POST \
+      --data-urlencode "payload={\"text\": \"$message\", \"username\": \"$username\", \"channel\":\"$channel\",\"icon_emoji\": \"$emoji\"}" \
+      $SLACK_HOOK >> /dev/null 2>&1
+    if [[ "$?" != 0 ]]; then
+      log "!Error sending to slack"
+    fi
+
+  fi
+}
+
 if [[ -n "$DOCKER_AUTH" ]]; then
   mkdir -p /root/.docker
   CONFIG_FILE=/root/.docker/config.json
@@ -125,15 +141,16 @@ if [[ -n "$WEBHOOK" ]]; then
    -H "Content-Type: application/json" \
    -X POST \
    -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
-   $WEBHOOK 
+   $WEBHOOK >> /dev/null 2>&1
 
   if [[ "$?" != 0 ]]; then
-    log "Hook errored"
+    log "!Hook errored"
   fi
 fi
 
 log "complete: $IMAGE"
 DURATION=$SECONDS
 log "finished in $SECONDS seconds"
+slack "$IMAGE:$TAG built in $SECONDS seconds"
 echo $IMAGE:$TAG
 

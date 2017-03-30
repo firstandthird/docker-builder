@@ -111,6 +111,10 @@ if [[ "$PUSH" == 1 ]]; then
     push $IMAGE:$TAG $REGISTRY_IMAGE:latest
   fi
 
+  if [[ -n "$TAG_BRANCH" ]]; then 
+    push $IMAGE:$TAG $REGISTRY_IMAGE:$BRANCH
+  fi
+
   IMAGE=$REGISTRY_IMAGE
 fi
 

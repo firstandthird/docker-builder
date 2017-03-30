@@ -11,6 +11,7 @@ docker run \
   -e DEBUG=$DEBUG \
   -e PUSH=$PUSH \
   -e TAG_LATEST=$TAG_LATEST \
+  -e TAG_BRANCH=$TAG_BRANCH \
   -e DOCKER_AUTH=$DOCKER_AUTH \
   -e TAG=$TAG \
   -v /var/run/docker.sock:/var/run/docker.sock \

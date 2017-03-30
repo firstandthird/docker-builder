@@ -64,8 +64,9 @@ log "fetching from repo"
 git fetch --quiet
 log "checking out ${BRANCH}"
 git reset --hard --quiet origin/${BRANCH}
+COMMIT=$(git log --pretty=format:"%h" -n 1)
 if [[ -z "$TAG" ]]; then
-  TAG=$(git log --pretty=format:"%h" -n 1)
+  TAG=$COMMIT
 fi
 
 IMAGE="${REPO}"
@@ -116,6 +117,19 @@ if [[ "$PUSH" == 1 ]]; then
   fi
 
   IMAGE=$REGISTRY_IMAGE
+fi
+
+if [[ -n "$WEBHOOK" ]]; then
+  log "triggering hook: $WEBHOOK"
+  curl \
+   -H "Content-Type: application/json" \
+   -X POST \
+   -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
+   $WEBHOOK 
+
+  if [[ "$?" != 0 ]]; then
+    log "Hook errored"
+  fi
 fi
 
 log "complete: $IMAGE"

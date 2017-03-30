@@ -83,33 +83,33 @@ else
   log "image exists, skipping build"
 fi
 
+push() {
+  local from=$1
+  local to=$2
+  log "tagging image $to"
+  docker tag $from $to > /dev/null
+
+  log "pushing $to"
+  docker push $to > /dev/null
+
+  if [[ "$?" != 0 ]]; then
+    echo "Push failed"
+    exit 1
+  fi
+}
+
 if [[ "$PUSH" == 1 ]]; then
   if [[ -n "$REGISTRY" ]]; then
     log "using registry: $REGISTRY"
     REGISTRY_IMAGE="${REGISTRY}/${IMAGE}"
   fi
 
-  log "tagging image $REGISTRY_IMAGE:$TAG"
-  docker tag $IMAGE:$TAG $REGISTRY_IMAGE:$TAG > /dev/null
+  push $IMAGE:$TAG $REGISTRY_IMAGE:$TAG
 
-  log "pushing $REGISTRY_IMAGE:$TAG"
-  docker push $REGISTRY_IMAGE:$TAG > /dev/null
-
-  if [[ "$?" != 0 ]]; then
-    echo "Push failed"
-    exit 1
+  if [[ -n "$TAG_LATEST" ]]; then
+    push $IMAGE:$TAG $REGISTRY_IMAGE:latest
   fi
-  if [[ -n "$PUSH_LATEST" ]]; then
-    log "tagging image $REGISTRY_IMAGE:latest"
-    docker tag $IMAGE:$TAG $REGISTRY_IMAGE:latest > /dev/null
 
-    log "pushing $REGISTRY_IMAGE:latest"
-    docker push $REGISTRY_IMAGE:latest > /dev/null
-    if [[ "$?" != 0 ]]; then
-      echo "Push failed"
-      exit 1
-    fi
-  fi
   IMAGE=$REGISTRY_IMAGE
 fi
 

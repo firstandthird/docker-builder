@@ -84,6 +84,9 @@ COMMIT=$(git log --pretty=format:"%h" -n 1)
 if [[ -z "$TAG" ]]; then
   TAG=$COMMIT
 fi
+if [[ -n "$TAG_PREFIX_BRANCH" ]]; then
+  TAG=${BRANCH}_${TAG}
+fi
 
 IMAGE="${REPO}"
 log "checking if ${IMAGE}:$TAG exists"
@@ -131,6 +134,7 @@ if [[ "$PUSH" == 1 ]]; then
   if [[ -n "$TAG_BRANCH" ]]; then 
     push $IMAGE:$TAG $REGISTRY_IMAGE:$BRANCH
   fi
+
 
   IMAGE=$REGISTRY_IMAGE
 fi

@@ -85,7 +85,7 @@ COMMIT=$(git log --pretty=format:"%h" -n 1)
 if [[ -z "$TAG" ]]; then
   TAG=$COMMIT
 fi
-if [[ -n "$TAG_PREFIX_BRANCH" ]]; then
+if [[ "$TAG_PREFIX_BRANCH" == 1 ]]; then
   TAG=${BRANCH}_${TAG}
 fi
 
@@ -130,11 +130,11 @@ if [[ "$PUSH" == 1 ]]; then
 
   push $IMAGE:$TAG $REGISTRY_IMAGE:$TAG
 
-  if [[ -n "$TAG_LATEST" ]]; then
+  if [[ "$TAG_LATEST" == 1 ]]; then
     push $IMAGE:$TAG $REGISTRY_IMAGE:latest
   fi
 
-  if [[ -n "$TAG_BRANCH" ]]; then 
+  if [[ "$TAG_BRANCH" == 1 ]]; then 
     push $IMAGE:$TAG $REGISTRY_IMAGE:$BRANCH
   fi
 

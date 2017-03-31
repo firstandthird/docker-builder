@@ -36,9 +36,9 @@ slack() {
     local username="${SLACK_NAME:-docker-builder}"
     local emoji="${SLACK_EMOJI:-:floppy_disk:}"
     local channel=$SLACK_CHANNEL
-    curl -X POST \
+    curl --fail --silent --show-error -X POST \
       --data-urlencode "payload={\"attachments\": [{ \"title\": \"$message\",\"color\":\"$color\" }], \"username\": \"$username\", \"channel\":\"$channel\",\"icon_emoji\": \"$emoji\"}" \
-      $SLACK_HOOK >> /dev/null 2>&1
+      $SLACK_HOOK > /dev/null
     if [[ "$?" != 0 ]]; then
       log "!Error sending to slack"
     fi
@@ -145,10 +145,11 @@ fi
 if [[ -n "$WEBHOOK" ]]; then
   log "triggering hook: $WEBHOOK"
   curl \
+    --fail --silent --show-error \
    -H "Content-Type: application/json" \
    -X POST \
    -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
-   $WEBHOOK >> /dev/null 2>&1
+   $WEBHOOK > /dev/null
 
   if [[ "$?" != 0 ]]; then
     slack "Hook errored: $HOOK" "danger"

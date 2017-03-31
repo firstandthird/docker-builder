@@ -5,6 +5,7 @@ docker run \
   -it \
   -e USER=$USER \
   -e REPO=$REPO \
+  -e BRANCH=$BRANCH \
   -e TOKEN=$TOKEN \
   -e REGISTRY_IMAGE=$REGISTRY_IMAGE \
   -e REGISTRY=$REGISTRY \

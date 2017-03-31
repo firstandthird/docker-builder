@@ -80,7 +80,15 @@ cd $REPOPATH
 log "fetching from repo"
 git fetch --quiet
 log "checking out ${BRANCH}"
-git reset --hard --quiet origin/${BRANCH}
+git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
+if [[ "$?" != 0 ]]; then
+  #maybe it's a tag
+  git reset --hard --quiet ${BRANCH}
+fi
+if [[ "$?" != 0 ]]; then
+  echo "error checking out $BRANCH"
+  exit 1
+fi
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 if [[ -z "$TAG" ]]; then
   TAG=$COMMIT

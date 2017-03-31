@@ -32,11 +32,12 @@ log() {
 slack() {
   if [[ -n "$SLACK_HOOK" ]]; then
     local message=$1
+    local color="${2:-good}"
     local username="${SLACK_NAME:-docker-builder}"
     local emoji="${SLACK_EMOJI:-:floppy_disk:}"
     local channel=$SLACK_CHANNEL
     curl -X POST \
-      --data-urlencode "payload={\"text\": \"$message\", \"username\": \"$username\", \"channel\":\"$channel\",\"icon_emoji\": \"$emoji\"}" \
+      --data-urlencode "payload={\"attachments\": [{ \"title\": \"$message\",\"color\":\"$color\" }], \"username\": \"$username\", \"channel\":\"$channel\",\"icon_emoji\": \"$emoji\"}" \
       $SLACK_HOOK >> /dev/null 2>&1
     if [[ "$?" != 0 ]]; then
       log "!Error sending to slack"
@@ -97,6 +98,7 @@ if [[ "$EXISTING" == "" ]]; then
   IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$TAG .)
   if [[ "$?" != 0 ]]; then
     echo "error building"
+    slack "error building $IMAGE:$TAG" "danger"
     echo $IMAGE_ID
     exit 1
   fi
@@ -115,6 +117,7 @@ push() {
 
   if [[ "$?" != 0 ]]; then
     echo "Push failed"
+    slack "error pushing $IMAGE:$TAG" "danger"
     exit 1
   fi
 }
@@ -148,6 +151,7 @@ if [[ -n "$WEBHOOK" ]]; then
    $WEBHOOK >> /dev/null 2>&1
 
   if [[ "$?" != 0 ]]; then
+    slack "Hook errored: $HOOK" "danger"
     log "!Hook errored"
   fi
 fi

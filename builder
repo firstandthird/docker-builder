@@ -98,6 +98,12 @@ if [[ "$TAG_PREFIX_BRANCH" == 1 ]]; then
 fi
 
 IMAGE="${REPO}"
+
+if [[ -n "$REGISTRY" ]]; then
+  log "using registry: $REGISTRY"
+  IMAGE="${REGISTRY}/${IMAGE}"
+fi
+
 log "checking if ${IMAGE}:$TAG exists"
 EXISTING=$(docker images -q $IMAGE:$TAG 2> /dev/null)
 
@@ -117,37 +123,33 @@ fi
 push() {
   local from=$1
   local to=$2
-  log "tagging image $to"
-  docker tag $from $to > /dev/null
+  if [[ -n "$to" ]]; then
+    log "tagging image $to"
+    docker tag $from $to > /dev/null
+  else
+    to=$from
+  fi
 
   log "pushing $to"
   docker push $to > /dev/null
 
   if [[ "$?" != 0 ]]; then
     echo "Push failed"
-    slack "error pushing $IMAGE:$TAG" "danger"
+    slack "error pushing $to" "danger"
     exit 1
   fi
 }
 
 if [[ "$PUSH" == 1 ]]; then
-  if [[ -n "$REGISTRY" ]]; then
-    log "using registry: $REGISTRY"
-    REGISTRY_IMAGE="${REGISTRY}/${IMAGE}"
-  fi
-
-  push $IMAGE:$TAG $REGISTRY_IMAGE:$TAG
+  push $IMAGE:$TAG
 
   if [[ "$TAG_LATEST" == 1 ]]; then
-    push $IMAGE:$TAG $REGISTRY_IMAGE:latest
+    push $IMAGE:$TAG $IMAGE:latest
   fi
 
   if [[ "$TAG_BRANCH" == 1 ]]; then 
-    push $IMAGE:$TAG $REGISTRY_IMAGE:$BRANCH
+    push $IMAGE:$TAG $IMAGE:$BRANCH
   fi
-
-
-  IMAGE=$REGISTRY_IMAGE
 fi
 
 if [[ -n "$WEBHOOK" ]]; then

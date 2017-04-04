@@ -140,15 +140,28 @@ push() {
   fi
 }
 
-if [[ "$PUSH" == 1 ]]; then
-  push $IMAGE:$TAG
+push_tags() {
+  local img=$1
+  local tag=$2
 
   if [[ "$TAG_LATEST" == 1 ]]; then
-    push $IMAGE:$TAG $IMAGE:latest
+    push $img:$tag $img:latest
   fi
 
   if [[ "$TAG_BRANCH" == 1 ]]; then 
-    push $IMAGE:$TAG $IMAGE:$BRANCH
+    push $img:$tag $img:$BRANCH
+  fi
+}
+
+if [[ "$PUSH" == 1 ]]; then
+
+  push $IMAGE:$TAG
+  push_tags $IMAGE $TAG
+
+  if [[ -n "$REGISTRY2" ]]; then
+    REG2IMG=$REGISTRY2/$REPO
+    push $IMAGE:$TAG $REG2IMG:$TAG
+    push_tags $REG2IMG $TAG
   fi
 fi
 

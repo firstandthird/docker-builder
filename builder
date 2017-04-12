@@ -89,6 +89,8 @@ if [[ "$?" != 0 ]]; then
   echo "error checking out $BRANCH"
   exit 1
 fi
+git submodule foreach "git reset --hard"
+git submodule update --init --recursive
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 if [[ -z "$TAG" ]]; then
   TAG=$COMMIT

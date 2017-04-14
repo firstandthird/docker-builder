@@ -167,6 +167,11 @@ if [[ "$PUSH" == 1 ]]; then
   fi
 fi
 
+if [[ "$CLEAN" == 1 ]]; then
+  log "Cleaning older images"
+  docker rmi $(docker images | grep "${IMAGE} " | tail -n +3 | awk '{ print $3 }')
+fi
+
 if [[ -n "$WEBHOOK" ]]; then
   log "triggering hook: $WEBHOOK"
   curl \

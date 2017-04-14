@@ -164,11 +164,6 @@ if [[ "$PUSH" == 1 ]]; then
   fi
   push_tags $IMAGE $TAG
 
-  if [[ -n "$REGISTRY2" ]]; then
-    REG2IMG=$REGISTRY2/$REPO
-    push $IMAGE:$TAG $REG2IMG:$TAG
-    push_tags $REG2IMG $TAG
-  fi
 fi
 
 if [[ "$CLEAN" == 1 ]]; then

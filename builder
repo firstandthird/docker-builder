@@ -151,6 +151,14 @@ push_tags() {
   fi
 
   if [[ "$TAG_BRANCH" == 1 ]]; then 
+    if [[ "$TAG_BRANCH_PREVIOUS" == 1 ]]; then
+      log "Tagging previous branch as $img:${BRANCH}_previous"
+      docker pull $img:$BRANCH > /dev/null
+      if [[ "$?" == 0 ]]; then
+        docker tag $img:$BRANCH $img:${BRANCH}_previous > /dev/null
+        docker push $img:${BRANCH}_previous > /dev/null
+      fi
+    fi
     push $img:$tag $img:$BRANCH
   fi
 }

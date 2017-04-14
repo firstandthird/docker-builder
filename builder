@@ -157,7 +157,11 @@ push_tags() {
 
 if [[ "$PUSH" == 1 ]]; then
 
-  push $IMAGE:$TAG
+  if [[ "$SKIP_PUSH_COMMIT" != 1 ]]; then
+    push $IMAGE:$TAG
+  else
+    log "Skipping commit tag"
+  fi
   push_tags $IMAGE $TAG
 
   if [[ -n "$REGISTRY2" ]]; then

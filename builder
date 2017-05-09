@@ -180,18 +180,20 @@ if [[ "$CLEAN" == 1 ]]; then
 fi
 
 if [[ -n "$WEBHOOK" ]]; then
-  log "triggering hook: $WEBHOOK"
-  curl \
-    --fail --silent --show-error \
-   -H "Content-Type: application/json" \
-   -X POST \
-   -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
-   $WEBHOOK > /dev/null
+  for hook in $WEBHOOK; do
+    log "triggering hook: $hook"
+    curl \
+      --fail --silent --show-error \
+     -H "Content-Type: application/json" \
+     -X POST \
+     -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
+     "$hook" > /dev/null
 
-  if [[ "$?" != 0 ]]; then
-    slack "Hook errored: $HOOK" "danger"
-    log "!Hook errored"
-  fi
+    if [[ "$?" != 0 ]]; then
+      slack "Hook errored: $hook" "danger"
+      log "!Hook errored"
+    fi
+  done
 fi
 
 log "complete: $IMAGE"

@@ -127,8 +127,9 @@ EXISTING=$(docker images -q $IMAGE:$TAG 2> /dev/null)
 if [[ "$EXISTING" == "" ]]; then
   log "building $IMAGE:$TAG with $DOCKERFILE"
   if [[ -f "pre-build.sh" ]]; then
-    . "pre-build.sh"
+    RES=$(. "pre-build.sh")
     if [[ "$?" != 0 ]]; then
+      echo $RES
       echo "error running pre-build"
       slack "error running pre-build $IMAGE:TAG" "danger"
       exit 1

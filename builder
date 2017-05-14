@@ -77,6 +77,20 @@ fi
 
 cd $REPOPATH
 
+attempts=0
+maxattemps=10
+lockfile=build.lock
+while [ -f "$lockfile" ]; do
+  log "Lock file exists, waiting for previous build to finish"
+  sleep 10
+  attempts=$(($attempts+1))
+  if [[ "$maxattempts" == "$attempts" ]]; then
+    log "Reached max attemps, exiting"
+    exit 1
+  fi
+done
+touch $lockfile
+
 log "fetching from repo"
 git fetch --quiet
 log "checking out ${BRANCH}"
@@ -121,6 +135,8 @@ if [[ "$EXISTING" == "" ]]; then
 else
   log "image exists, skipping build"
 fi
+
+rm $lockfile
 
 push() {
   local from=$1

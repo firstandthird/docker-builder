@@ -126,6 +126,14 @@ EXISTING=$(docker images -q $IMAGE:$TAG 2> /dev/null)
 
 if [[ "$EXISTING" == "" ]]; then
   log "building $IMAGE:$TAG with $DOCKERFILE"
+  if [[ -f "pre-build.sh" ]]; then
+    . "pre-build.sh"
+    if [[ "$?" != 0 ]]; then
+      echo "error running pre-build"
+      slack "error running pre-build $IMAGE:TAG" "danger"
+      exit 1
+    fi
+  fi
   IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$TAG .)
   if [[ "$?" != 0 ]]; then
     rm $lockfile

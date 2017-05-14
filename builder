@@ -101,6 +101,7 @@ if [[ "$?" != 0 ]]; then
 fi
 if [[ "$?" != 0 ]]; then
   echo "error checking out $BRANCH"
+  rm $lockfile
   exit 1
 fi
 git submodule foreach "git reset --hard"
@@ -127,6 +128,7 @@ if [[ "$EXISTING" == "" ]]; then
   log "building $IMAGE:$TAG with $DOCKERFILE"
   IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$TAG .)
   if [[ "$?" != 0 ]]; then
+    rm $lockfile
     echo "error building"
     slack "error building $IMAGE:$TAG" "danger"
     echo $IMAGE_ID

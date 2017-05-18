@@ -148,6 +148,7 @@ else
 fi
 
 rm $lockfile
+PUSHED=""
 
 push() {
   local from=$1
@@ -160,6 +161,7 @@ push() {
   fi
 
   log "pushing $to"
+  PUSHED="$PUSHED $to"
   docker push $to > /dev/null
 
   if [[ "$?" != 0 ]]; then
@@ -226,6 +228,6 @@ fi
 log "complete: $IMAGE"
 DURATION=$SECONDS
 log "finished in $SECONDS seconds"
-slack "$IMAGE:$TAG built in $SECONDS seconds"
+slack "Built: $USER/$REPO#$BRANCH\nCommit: https://github.com/$USER/$REPO/commit/$COMMIT\nImage: $IMAGE:$TAG\nPushed: $PUSHED\nDuration: $SECONDS seconds"
 echo $IMAGE:$TAG
 

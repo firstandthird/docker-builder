@@ -130,6 +130,7 @@ if [[ "$EXISTING" == "" ]]; then
     RES=$(. "pre-build.sh")
     if [[ "$?" != 0 ]]; then
       echo $RES
+      rm $lockfile
       echo "error running pre-build"
       slack "error running pre-build $IMAGE:TAG" "danger"
       exit 1

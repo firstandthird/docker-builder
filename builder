@@ -30,8 +30,8 @@ log() {
 }
 
 if [[ -n "$DOCKER_AUTH" ]]; then
-  mkdir -p /root/.docker
-  CONFIG_FILE=/root/.docker/config.json
+  mkdir -p $HOME/.docker
+  CONFIG_FILE=$HOME/.docker/config.json
   log "Using DOCKER_AUTH"
   cat > $CONFIG_FILE <<- EOM
 {
@@ -44,7 +44,7 @@ if [[ -n "$DOCKER_AUTH" ]]; then
 EOM
 fi
 
-if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
+if [[ -d "$HOME/.docker" || -n "$REGISTRY" ]]; then
   PUSH=1
 else
   PUSH=0

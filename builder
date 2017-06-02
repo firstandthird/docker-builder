@@ -54,6 +54,10 @@ REPOPATH="${REPOS}/${USER}_${REPO}"
 
 if [[ ! -d "$REPOPATH" ]]; then
   git clone --quiet https://token:${TOKEN}@github.com/${USER}/${REPO}.git $REPOPATH
+  if [[ "$?" != 0 ]]; then
+    echo "failed to clone"
+    exit 1
+  fi
 fi
 
 cd $REPOPATH

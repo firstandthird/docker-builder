@@ -70,7 +70,7 @@ while [ -f "$lockfile" ]; do
   sleep 10
   attempts=$(($attempts+1))
   if [[ "$maxattempts" == "$attempts" ]]; then
-    log "Reached max attemps, exiting"
+    echo "Reached max attemps, exiting"
     exit 1
   fi
 done

@@ -7,22 +7,11 @@ docker run \
   -e REPO=$REPO \
   -e BRANCH=$BRANCH \
   -e TOKEN=$TOKEN \
-  -e REGISTRY_IMAGE=$REGISTRY_IMAGE \
-  -e REGISTRY=$REGISTRY \
+  -e IMAGE_NAME=$IMAGE_NAME \
   -e DEBUG=$DEBUG \
-  -e PUSH=$PUSH \
   -e CLEAN=$CLEAN \
-  -e TAG_LATEST=$TAG_LATEST \
-  -e TAG_BRANCH=$TAG_BRANCH \
-  -e TAG_BRANCH_PREVIOUS=$TAG_BRANCH_PREVIOUS \
-  -e TAG_PREFIX_BRANCH=$TAG_PREFIX_BRANCH \
-  -e SKIP_PUSH_COMMIT=$SKIP_PUSH_COMMIT \
-  -e DOCKER_AUTH=$DOCKER_AUTH \
-  -e WEBHOOK="$WEBHOOK" \
-  -e SLACK_HOOK=$SLACK_HOOK \
-  -e SLACK_CHANNEL=$SLACK_CHANNEL \
-  -e TAG=$TAG \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $PWD/builder:/builder \
   -v $PWD/repos:/repos \
+  -v $HOME/.docker:/root/.docker \
   firstandthird/builder

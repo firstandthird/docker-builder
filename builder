@@ -25,24 +25,7 @@ fi
 
 log() {
   if [[ "$DEBUG" == "1" ]]; then
-    echo $@
-  fi
-}
-
-slack() {
-  if [[ -n "$SLACK_HOOK" ]]; then
-    local message=$1
-    local color="${2:-good}"
-    local username="${SLACK_NAME:-docker-builder}"
-    local emoji="${SLACK_EMOJI:-:floppy_disk:}"
-    local channel=$SLACK_CHANNEL
-    curl --fail --silent --show-error -X POST \
-      --data-urlencode "payload={\"attachments\": [{ \"title\": \"$message\",\"color\":\"$color\" }], \"username\": \"$username\", \"channel\":\"$channel\",\"icon_emoji\": \"$emoji\"}" \
-      $SLACK_HOOK > /dev/null
-    if [[ "$?" != 0 ]]; then
-      log "!Error sending to slack"
-    fi
-
+    echo "$@"
   fi
 }
 
@@ -61,12 +44,10 @@ if [[ -n "$DOCKER_AUTH" ]]; then
 EOM
 fi
 
-if [[ -z "$PUSH" ]]; then
-  if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
-    PUSH=1
-  else
-    PUSH=0
-  fi
+if [[ -d "/root/.docker" || -n "$REGISTRY" ]]; then
+  PUSH=1
+else
+  PUSH=0
 fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"
@@ -107,40 +88,30 @@ fi
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 COMMIT=$(git log --pretty=format:"%h" -n 1)
-if [[ -z "$TAG" ]]; then
-  TAG=$COMMIT
-fi
-if [[ "$TAG_PREFIX_BRANCH" == 1 ]]; then
-  TAG=${BRANCH}_${TAG}
+
+if [[ -z "$IMAGE_NAME" ]]; then
+  IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
 fi
 
-IMAGE="${REPO}"
 
-if [[ -n "$REGISTRY" ]]; then
-  log "using registry: $REGISTRY"
-  IMAGE="${REGISTRY}/${IMAGE}"
-fi
-
-log "checking if ${IMAGE}:$TAG exists"
-EXISTING=$(docker images -q $IMAGE:$TAG 2> /dev/null)
+log "checking if $IMAGE_NAME exists"
+EXISTING=$(docker images -q $IMAGE_NAME 2> /dev/null)
 
 if [[ "$EXISTING" == "" ]]; then
-  log "building $IMAGE:$TAG with $DOCKERFILE"
+  log "building $IMAGE_NAME with $DOCKERFILE"
   if [[ -f "pre-build.sh" ]]; then
     RES=$(. "pre-build.sh")
     if [[ "$?" != 0 ]]; then
       echo $RES
       rm $lockfile
       echo "error running pre-build"
-      slack "error running pre-build $IMAGE:TAG" "danger"
       exit 1
     fi
   fi
-  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE:$TAG .)
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME .)
   if [[ "$?" != 0 ]]; then
     rm $lockfile
-    echo "error building"
-    slack "error building $IMAGE:$TAG" "danger"
+    echo "error building $IMAGE_NAME"
     echo $IMAGE_ID
     exit 1
   fi
@@ -149,59 +120,17 @@ else
 fi
 
 rm $lockfile
-PUSHED=""
 
-push() {
-  local from=$1
-  local to=$2
-  if [[ -n "$to" ]]; then
-    log "tagging image $to"
-    docker tag $from $to > /dev/null
-  else
-    to=$from
-  fi
-
-  log "pushing $to"
-  PUSHED="$PUSHED $to"
-  docker push $to > /dev/null
-
-  if [[ "$?" != 0 ]]; then
-    echo "Push failed"
-    slack "error pushing $to" "danger"
-    exit 1
-  fi
-}
-
-push_tags() {
-  local img=$1
-  local tag=$2
-
-  if [[ "$TAG_LATEST" == 1 ]]; then
-    push $img:$tag $img:latest
-  fi
-
-  if [[ "$TAG_BRANCH" == 1 ]]; then 
-    if [[ "$TAG_BRANCH_PREVIOUS" == 1 ]]; then
-      log "Tagging previous branch as $img:${BRANCH}_previous"
-      docker pull $img:$BRANCH > /dev/null
-      if [[ "$?" == 0 ]]; then
-        docker tag $img:$BRANCH $img:${BRANCH}_previous > /dev/null
-        docker push $img:${BRANCH}_previous > /dev/null
-      fi
-    fi
-    push $img:$tag $img:$BRANCH
-  fi
-}
 
 if [[ "$PUSH" == 1 ]]; then
 
-  if [[ "$SKIP_PUSH_COMMIT" != 1 ]]; then
-    push $IMAGE:$TAG
-  else
-    log "Skipping commit tag"
-  fi
-  push_tags $IMAGE $TAG
+  log "pushing $IMAGE_NAME"
+  docker push $IMAGE_NAME > /dev/null
 
+  if [[ "$?" != 0 ]]; then
+    echo "Push failed"
+    exit 1
+  fi
 fi
 
 if [[ "$CLEAN" == 1 ]]; then
@@ -209,26 +138,8 @@ if [[ "$CLEAN" == 1 ]]; then
   docker rmi $(docker images | grep "${IMAGE} " | tail -n +3 | awk '{ print $3 }') > /dev/null 2>&1
 fi
 
-if [[ -n "$WEBHOOK" ]]; then
-  for hook in $WEBHOOK; do
-    log "triggering hook: $hook"
-    curl \
-      --fail --silent --show-error \
-     -H "Content-Type: application/json" \
-     -X POST \
-     -d "{\"repo\":\"$REPO\",\"user\":\"$USER\",\"branch\":\"$BRANCH\",\"commit\": \"$COMMIT\",\"dockerImage\":\"$IMAGE:$TAG\"}" \
-     "$hook" > /dev/null
-
-    if [[ "$?" != 0 ]]; then
-      slack "Hook errored: $hook" "danger"
-      log "!Hook errored"
-    fi
-  done
-fi
-
-log "complete: $IMAGE"
+log "complete: $IMAGE_NAME"
 DURATION=$SECONDS
 log "finished in $SECONDS seconds"
-slack "Built: $USER/$REPO#$BRANCH\nCommit: https://github.com/$USER/$REPO/commit/$COMMIT\nImage: $IMAGE:$TAG\nPushed: $PUSHED\nDuration: $SECONDS seconds"
-echo $IMAGE:$TAG
+echo $IMAGE_NAME
 

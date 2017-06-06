@@ -98,11 +98,7 @@ if [[ -z "$IMAGE_NAME" ]]; then
 fi
 
 
-# Skipping if image exists
-#log "checking if $IMAGE_NAME exists"
-# EXISTING=$(docker images -q $IMAGE_NAME 2> /dev/null)
 
-#if [[ "$EXISTING" == "" ]]; then
 log "building $IMAGE_NAME with $DOCKERFILE"
 if [[ -f "pre-build.sh" ]]; then
   RES=$(. "pre-build.sh")
@@ -120,9 +116,6 @@ if [[ "$?" != 0 ]]; then
   echo $IMAGE_ID
   exit 1
 fi
-#else
-#  log "image exists, skipping build"
-#fi
 
 rm $lockfile
 

@@ -97,7 +97,10 @@ if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
 fi
 
-
+if [[ -n "$CONTEXT" ]]; then
+  log "switching to $CONTEXT to build"
+  cd "$CONTEXT"
+fi
 
 log "building $IMAGE_NAME with $DOCKERFILE"
 if [[ -f "pre-build.sh" ]]; then

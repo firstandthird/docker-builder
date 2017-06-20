@@ -97,9 +97,8 @@ if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
 fi
 
-if [[ -n "$CONTEXT" ]]; then
-  log "switching to $CONTEXT to build"
-  cd "$CONTEXT"
+if [[ -z "$CONTEXT" ]]; then
+  CONTEXT='.'
 fi
 
 log "building $IMAGE_NAME with $DOCKERFILE"
@@ -112,7 +111,7 @@ if [[ -f "pre-build.sh" ]]; then
     exit 1
   fi
 fi
-IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME .)
+IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME $CONTEXT)
 if [[ "$?" != 0 ]]; then
   rm $lockfile
   echo "error building $IMAGE_NAME"

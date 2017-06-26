@@ -102,8 +102,10 @@ if [[ -z "$CONTEXT" ]]; then
 fi
 
 log "building $IMAGE_NAME with $DOCKERFILE"
-if [[ -f "pre-build.sh" ]]; then
-  RES=$(. "pre-build.sh")
+PREBUILD_FILE="${CONTEXT}/pre-build.sh"
+if [[ -f $PREBUILD_FILE ]]; then
+  log "running pre-build"
+  RES=$(. $PREBUILD_FILE)
   if [[ "$?" != 0 ]]; then
     echo $RES
     rm $lockfile

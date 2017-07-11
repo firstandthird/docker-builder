@@ -51,6 +51,7 @@ else
 fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"
+LASTTHASH=
 
 if [[ ! -d "$REPOPATH" ]]; then
   git clone --quiet https://token:${TOKEN}@github.com/${USER}/${REPO}.git $REPOPATH
@@ -79,6 +80,9 @@ touch $lockfile
 log "fetching from repo"
 git fetch --quiet
 log "checking out ${BRANCH}"
+git checkout ${BRANCH} > /dev/null 2>&1
+LASTHASH=$(git rev-parse HEAD)
+
 git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
 if [[ "$?" != 0 ]]; then
   #maybe it's a tag
@@ -89,6 +93,7 @@ if [[ "$?" != 0 ]]; then
   rm $lockfile
   exit 1
 fi
+
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 COMMIT=$(git log --pretty=format:"%h" -n 1)
@@ -100,6 +105,16 @@ fi
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT='.'
 fi
+
+#do we even need to build
+
+DIFF=$(git diff --name-only ${LASTHASH} ${COMMIT} ${CONTEXT})
+
+if [[ -z $DIFF ]]
+  echo "No difference in context"
+  exit 1
+fi
+
 
 log "building $IMAGE_NAME with $DOCKERFILE"
 PREBUILD_FILE="${CONTEXT}/pre-build.sh"

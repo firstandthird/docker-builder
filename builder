@@ -51,7 +51,6 @@ else
 fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"
-LASTTHASH=
 
 if [[ ! -d "$REPOPATH" ]]; then
   git clone --quiet https://token:${TOKEN}@github.com/${USER}/${REPO}.git $REPOPATH
@@ -66,6 +65,7 @@ cd $REPOPATH
 attempts=0
 maxattemps=10
 lockfile=build.lock
+
 while [ -f "$lockfile" ]; do
   log "Lock file exists, waiting for previous build to finish"
   sleep 10
@@ -75,13 +75,11 @@ while [ -f "$lockfile" ]; do
     exit 1
   fi
 done
+
 touch $lockfile
 
 log "fetching from repo"
 git fetch --quiet
-log "checking out ${BRANCH}"
-git checkout ${BRANCH} > /dev/null 2>&1
-LASTHASH=$(git rev-parse HEAD)
 
 git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
 if [[ "$?" != 0 ]]; then
@@ -107,14 +105,14 @@ if [[ -z "$CONTEXT" ]]; then
 fi
 
 #do we even need to build
-
-DIFF=$(git diff --name-only ${LASTHASH} ${COMMIT} ${CONTEXT})
-
-if [[ -z $DIFF ]]
-  echo "No difference in context"
-  exit 1
+if [[ -n "$BEFORE" ]]; then
+  DIFF=$(git diff --name-only ${BEFORE} ${COMMIT} ${CONTEXT})
+  if [[ -z "$DIFF" ]]; then
+    echo "No difference in context"
+    rm $lockfile
+    exit 0
+  fi
 fi
-
 
 log "building $IMAGE_NAME with $DOCKERFILE"
 PREBUILD_FILE="${CONTEXT}/pre-build.sh"

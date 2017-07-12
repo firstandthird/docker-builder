@@ -65,6 +65,7 @@ cd $REPOPATH
 attempts=0
 maxattemps=10
 lockfile=build.lock
+
 while [ -f "$lockfile" ]; do
   log "Lock file exists, waiting for previous build to finish"
   sleep 10
@@ -74,11 +75,12 @@ while [ -f "$lockfile" ]; do
     exit 1
   fi
 done
+
 touch $lockfile
 
 log "fetching from repo"
 git fetch --quiet
-log "checking out ${BRANCH}"
+
 git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
 if [[ "$?" != 0 ]]; then
   #maybe it's a tag
@@ -89,6 +91,7 @@ if [[ "$?" != 0 ]]; then
   rm $lockfile
   exit 1
 fi
+
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 COMMIT=$(git log --pretty=format:"%h" -n 1)
@@ -99,6 +102,16 @@ fi
 
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT='.'
+fi
+
+#do we even need to build
+if [[ -n "$BEFORE" ]]; then
+  DIFF=$(git diff --name-only ${BEFORE} ${COMMIT} ${CONTEXT})
+  if [[ -z "$DIFF" ]]; then
+    echo "No difference in context"
+    rm $lockfile
+    exit 0
+  fi
 fi
 
 log "building $IMAGE_NAME with $DOCKERFILE"

@@ -126,7 +126,11 @@ if [[ -f $PREBUILD_FILE ]]; then
     exit 1
   fi
 fi
-IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME $CONTEXT)
+if [[ "$DEBUG" == "1" ]]; then
+  docker build -f $DOCKERFILE -t $IMAGE_NAME $CONTEXT
+else
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME $CONTEXT)
+fi
 if [[ "$?" != 0 ]]; then
   rm $lockfile
   echo "error building $IMAGE_NAME"

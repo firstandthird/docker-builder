@@ -127,9 +127,9 @@ if [[ -f $PREBUILD_FILE ]]; then
   fi
 fi
 if [[ "$DEBUG" == "1" ]]; then
-  docker build -f $DOCKERFILE -t $IMAGE_NAME --build-arg GIT_COMMIT=$(git log -1 --format=%h) --build-arg GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) $CONTEXT
+  docker build -f $DOCKERFILE -t $IMAGE_NAME --build-arg GIT_COMMIT=$(git log -1 --format=%h) --build-arg GIT_BRANCH=$BRANCH $CONTEXT
 else
-  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME --build-arg GIT_COMMIT=$(git log -1 --format=%h) --build-arg GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) $CONTEXT)
+  IMAGE_ID=$(docker build --quiet -f $DOCKERFILE -t $IMAGE_NAME --build-arg GIT_COMMIT=$(git log -1 --format=%h) --build-arg GIT_BRANCH=$BRANCH $CONTEXT)
 fi
 if [[ "$?" != 0 ]]; then
   rm $lockfile

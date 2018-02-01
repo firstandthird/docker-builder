@@ -104,6 +104,8 @@ if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
 fi
 
+IMAGE_NAME=${IMAGE_NAME//\//\-}
+
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT='.'
 fi

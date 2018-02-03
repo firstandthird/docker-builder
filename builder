@@ -102,9 +102,8 @@ COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
+  IMAGE_NAME="${REPO}_${BRANCH//\//\-}:${COMMIT}"
 fi
-
-IMAGE_NAME=${IMAGE_NAME//\//\-}
 
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT='.'

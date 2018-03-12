@@ -118,6 +118,14 @@ if [[ -n "$BEFORE" ]]; then
   fi
 fi
 
+DID_CREATE_DOCKER_IGNORE=0
+DOCKER_IGNORE="${CONTEXT}/.dockerignore"
+if [[ ! -f $DOCKER_IGNORE ]]; then
+  log "No .dockerfile found, generating temporary one to ignore .git"
+  DID_CREATE_DOCKER_IGNORE=1
+  echo ".git" >> $DOCKER_IGNORE
+fi
+
 log "building $IMAGE_NAME with $DOCKERFILE"
 PREBUILD_FILE="${CONTEXT}/pre-build.sh"
 if [[ -f $PREBUILD_FILE ]]; then
@@ -144,6 +152,9 @@ fi
 
 rm $lockfile
 
+if [[ "$DID_CREATE_DOCKER_IGNORE" == 1 ]]; then
+  rm $DOCKER_IGNORE
+fi
 
 if [[ "$PUSH" == 1 ]]; then
 
@@ -160,6 +171,8 @@ if [[ "$CLEAN" == 1 ]]; then
   log "Cleaning older images"
   docker rmi $(docker images | grep "${IMAGE} " | tail -n +3 | awk '{ print $3 }') > /dev/null 2>&1
 fi
+
+
 
 log "complete: $IMAGE_NAME"
 DURATION=$SECONDS

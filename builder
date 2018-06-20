@@ -66,6 +66,23 @@ fi
 
 cd $REPOPATH
 
+
+if [[ "$MONOREPO" == "true" ]]; then
+  MONOREPO=
+  REPOPATH="${REPOPATH}/*"
+  for FILENAME in $REPOPATH; do
+    if [[ -d "${FILENAME}" ]]; then
+      if [[ -f "${FILENAME}/Dockerfile" ]]; then
+        echo "Building ${FILENAME}";
+        CONTEXT=${FILENAME}
+        DOCKERFILE="${FILENAME}/Dockerfile"
+        $0
+      fi
+    fi
+  done
+  exit 1
+fi
+
 attempts=0
 maxattemps=10
 lockfile=build.lock

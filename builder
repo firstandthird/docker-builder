@@ -1,5 +1,7 @@
 #!/bin/bash
 
+BUILDER=$0
+
 SECONDS=0
 if [[ -z "$REPOS" ]]; then
   REPOS=/repos
@@ -66,21 +68,18 @@ fi
 
 cd $REPOPATH
 
-
 if [[ "$MONOREPO" == "true" ]]; then
   MONOREPO=
   REPOPATH="${REPOPATH}/*"
   for FILENAME in $REPOPATH; do
     if [[ -d "${FILENAME}" ]]; then
-      if [[ -f "${FILENAME}/Dockerfile" ]]; then
+      if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         echo "Building ${FILENAME}";
-        CONTEXT=${FILENAME}
-        DOCKERFILE="${FILENAME}/Dockerfile"
-        $0
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} $BUILDER)
       fi
     fi
   done
-  exit 1
+  exit 0
 fi
 
 attempts=0

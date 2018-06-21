@@ -17,6 +17,10 @@ if [[ -z "$REPO" ]]; then
   exit 1
 fi
 
+if [[ -n "$DOCKER_REGISTRY" ]]; then
+  DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
+fi
+
 if [[ -z "$BRANCH" ]]; then
   BRANCH="master"
 fi
@@ -50,7 +54,7 @@ if [[ -n "$DOCKER_AUTH" ]]; then
 EOM
 fi
 
-if [[ -d "$HOME/.docker" || -n "$REGISTRY" ]]; then
+if [[ -d "$HOME/.docker" && -n "$DOCKER_REGISTRY" ]]; then
   PUSH=1
 else
   PUSH=0
@@ -70,11 +74,12 @@ cd $REPOPATH
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ "$MONOREPO" == "true" ]]; then
+  echo "Building as monorepo...."
   MONOREPO=
   REPODIR="${REPOPATH}/*"
   
   if [[ -z "$IMAGE_NAME" ]]; then
-    IMAGE_NAME="${REPO}_${BRANCH}:{%folder%}_${COMMIT}"
+    IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:{%folder%}_${BRANCH}"
   fi
 
   for FILENAME in $REPODIR; do
@@ -82,7 +87,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         IMAGE_NM="${IMAGE_NAME/\{\%folder\%\}/$FOLDER}"
-        echo "Building ${FILENAME}";
+        echo "Building folder ${FILENAME}";
         (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} IMAGE_NAME=${IMAGE_NM} $BUILDER)
       fi
     fi
@@ -106,7 +111,7 @@ done
 
 touch $lockfile
 
-log "fetching from repo"
+log "fetching from repo branch ${BRANCH}"
 git fetch --quiet
 
 git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
@@ -124,7 +129,7 @@ git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 
 if [[ -z "$IMAGE_NAME" ]]; then
-  IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
+  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${BRANCH}"
 fi
 
 if [[ -z "$CONTEXT" ]]; then

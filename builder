@@ -58,10 +58,6 @@ fi
 
 REPOPATH="${REPOS}/${USER}_${REPO}"
 
-if [[ -z "$IMAGE_NAME" ]]; then
-  IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
-fi
-
 if [[ ! -d "$REPOPATH" ]]; then
   git clone --quiet https://token:${TOKEN}@github.com/${USER}/${REPO}.git $REPOPATH
   if [[ "$?" != 0 ]]; then
@@ -71,15 +67,21 @@ if [[ ! -d "$REPOPATH" ]]; then
 fi
 
 cd $REPOPATH
+COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ "$MONOREPO" == "true" ]]; then
   MONOREPO=
   REPODIR="${REPOPATH}/*"
+  
+  if [[ -z "$IMAGE_NAME" ]]; then
+    IMAGE_NAME="${REPO}_${BRANCH}:{%folder%}_${COMMIT}"
+  fi
+
   for FILENAME in $REPODIR; do
     if [[ -d "${FILENAME}" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
-        IMAGE_NM="${IMAGE_NAME/\{\>folder\<\}/$FOLDER}"
+        IMAGE_NM="${IMAGE_NAME/\{\%folder\%\}/$FOLDER}"
         echo "Building ${FILENAME}";
         (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} IMAGE_NAME=${IMAGE_NM} $BUILDER)
       fi
@@ -120,8 +122,10 @@ fi
 
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
-COMMIT=$(git log --pretty=format:"%h" -n 1)
 
+if [[ -z "$IMAGE_NAME" ]]; then
+  IMAGE_NAME="${REPO}_${BRANCH}:${COMMIT}"
+fi
 
 if [[ -z "$CONTEXT" ]]; then
   CONTEXT='.'

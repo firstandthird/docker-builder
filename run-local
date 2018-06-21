@@ -19,6 +19,8 @@ if [[ -z "$ARG" ]]; then
     -e CLEAN=$CLEAN \
     -e DOCKER_REGISTRY=$DOCKER_REGISTRY \
     -e BEFORE=$BEFORE \
+    -e CPU_SHARES=700 \
+    -e MEM_LIMIT=256M \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/repos:/repos \
     firstandthird/builder:latest

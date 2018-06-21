@@ -33,6 +33,14 @@ if [[ -z "$BUILD_ARGS" ]]; then
   BUILD_ARGS=""
 fi
 
+if [[ -n "$CPU_SHARES" ]]; then
+  BUILD_ARGS="${BUILD_ARGS} --cpu-shares $CPU_SHARES"
+fi
+
+if [[ -n "$MEM_LIMIT" ]]; then
+  BUILD_ARGS="${BUILD_ARGS} --memory $MEM_LIMIT"
+fi
+
 log() {
   if [[ "$DEBUG" == "1" ]]; then
     echo "$@"
@@ -150,7 +158,7 @@ if [[ -n "$BEFORE" ]]; then
   fi
 fi
 
-log "building $IMAGE_NAME with $DOCKERFILE"
+log "building $IMAGE_NAME with $DOCKERFILE using args $BUILD_ARGS"
 PREBUILD_FILE="${CONTEXT}/pre-build.sh"
 if [[ -f $PREBUILD_FILE ]]; then
   log "running pre-build"

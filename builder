@@ -74,7 +74,8 @@ cd $REPOPATH
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ "$MONOREPO" == "true" ]]; then
-  echo "Building as monorepo...."
+  log "Building as monorepo...."
+  log ""
   MONOREPO=
   REPODIR="${REPOPATH}/*"
   
@@ -87,8 +88,9 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         IMAGE_NM="${IMAGE_NAME/\{\%folder\%\}/$FOLDER}"
-        echo "Building folder ${FILENAME}";
+        log "Building folder ${FILENAME}";
         (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} IMAGE_NAME=${IMAGE_NM} $BUILDER)
+        log ""
       fi
     fi
   done

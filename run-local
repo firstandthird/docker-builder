@@ -18,6 +18,7 @@ if [[ -z "$ARG" ]]; then
     -e DEBUG=$DEBUG \
     -e CLEAN=$CLEAN \
     -e DOCKER_REGISTRY=$DOCKER_REGISTRY \
+    -e BEFORE=$BEFORE \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/repos:/repos \
     firstandthird/builder:latest

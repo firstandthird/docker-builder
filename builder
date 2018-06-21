@@ -141,8 +141,10 @@ fi
 #do we even need to build
 if [[ -n "$BEFORE" ]]; then
   DIFF=$(git diff --name-only ${BEFORE} ${COMMIT} ${CONTEXT})
-  if [[ -z "$DIFF" ]]; then
-    echo "No difference in context"
+
+  if [[ -z "$DIFF" && "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]]; then
+    #check if image exists, if it doesn't exist in registry, we should still build
+    echo "No difference in context and image exists"
     rm $lockfile
     exit 0
   fi

@@ -22,6 +22,8 @@ if [[ -z "$ARG" ]]; then
     -e CPU_SHARES=700 \
     -e MEM_LIMIT=256M \
     -e POST_HOOK="/test-post-hook arg1" \
+    -e WEBHOOK=$WEBHOOK \
+    -e WEBHOOK_DATA="blah=123" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/repos:/repos \
     -v $PWD/test-post-hook:/test-post-hook \

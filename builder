@@ -206,6 +206,21 @@ if [[ -n "$POST_HOOK" ]]; then
   . $POST_HOOK $IMAGE_NAME
 fi
 
+if [[ -n "$WEBHOOK" ]]; then
+  for hook in $WEBHOOK; do
+    log "triggering hook: $hook"
+    curl \
+      --fail --silent --show-error \
+     -X POST \
+     -d "repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&image=$IMAGE_NAME&$WEBHOOK_DATA" \
+     "$hook" > /dev/null
+
+    if [[ "$?" != 0 ]]; then
+      log "!Hook errored"
+    fi
+  done
+fi
+
 log "complete: $IMAGE_NAME"
 DURATION=$SECONDS
 log "finished in $SECONDS seconds"

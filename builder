@@ -201,6 +201,11 @@ if [[ "$CLEAN" == 1 ]]; then
   docker rmi $(docker images | grep "${IMAGE} " | tail -n +3 | awk '{ print $3 }') > /dev/null 2>&1
 fi
 
+if [[ -n "$POST_HOOK" ]]; then
+  log "running post hook: $POST_HOOK"
+  . $POST_HOOK $IMAGE_NAME
+fi
+
 log "complete: $IMAGE_NAME"
 DURATION=$SECONDS
 log "finished in $SECONDS seconds"

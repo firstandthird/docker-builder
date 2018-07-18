@@ -21,8 +21,10 @@ if [[ -z "$ARG" ]]; then
     -e BEFORE=$BEFORE \
     -e CPU_SHARES=700 \
     -e MEM_LIMIT=256M \
+    -e POST_HOOK="/test-post-hook arg1" \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/repos:/repos \
+    -v $PWD/test-post-hook:/test-post-hook \
     firstandthird/builder:latest
 fi
 

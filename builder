@@ -43,7 +43,7 @@ fi
 
 log() {
   if [[ "$DEBUG" == "1" ]]; then
-    echo "$@"
+    echo -e "  \e[33m$@\e[39m"
   fi
 }
 

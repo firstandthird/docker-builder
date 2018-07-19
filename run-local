@@ -24,6 +24,7 @@ if [[ -z "$ARG" ]]; then
     -e POST_HOOK="/test-post-hook arg1" \
     -e WEBHOOK=$WEBHOOK \
     -e WEBHOOK_DATA="blah=123" \
+    -e WEBHOOK_MONOREPO=$WEBHOOK \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $PWD/repos:/repos \
     -v $PWD/test-post-hook:/test-post-hook \

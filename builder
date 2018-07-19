@@ -102,6 +102,21 @@ if [[ "$MONOREPO" == "true" ]]; then
       fi
     fi
   done
+
+  if [[ -n "$WEBHOOK_MONOREPO" ]]; then
+    for hook in $WEBHOOK_MONOREPO; do
+      log "triggering monorepo hook: $hook"
+      curl \
+        --fail --silent --show-error \
+       -X POST \
+       -d "repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&monorepo=true&$WEBHOOK_DATA" \
+       "$hook" > /dev/null
+
+      if [[ "$?" != 0 ]]; then
+        log "!Hook errored"
+      fi
+    done
+  fi
   exit 0
 fi
 

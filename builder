@@ -98,11 +98,11 @@ if [[ "$MONOREPO" == "true" ]]; then
         IMAGE_NM="${IMAGE_NAME/\{\%folder\%\}/$FOLDER}"
         log "Building folder ${FILENAME}";
         (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} IMAGE_NAME=${IMAGE_NM} $BUILDER)
-        log ""
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1
         fi
+        log ""
       fi
     fi
   done

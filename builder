@@ -83,6 +83,19 @@ COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ "$MONOREPO" == "true" ]]; then
   log "Building as monorepo...."
+  log "pre-fetching from repo branch ${BRANCH}"
+  git fetch --quiet
+
+  git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
+  if [[ "$?" != 0 ]]; then
+    #maybe it's a tag
+    git reset --hard --quiet ${BRANCH}
+  fi
+  if [[ "$?" != 0 ]]; then
+    echo "error checking out $BRANCH"
+    exit 1
+  fi
+
   log ""
   MONOREPO=
   REPODIR="${REPOPATH}/*"

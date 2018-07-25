@@ -170,8 +170,12 @@ fi
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 
+if [[ -n "$TAG_PREFIX" ]]; then
+  TAG_PREFIX="${TAG_PREFIX}_"
+fi
+
 if [[ -z "$IMAGE_NAME" ]]; then
-  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${BRANCH}"
+  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH}"
 fi
 
 if [[ -z "$CONTEXT" ]]; then

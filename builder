@@ -17,10 +17,6 @@ if [[ -z "$REPO" ]]; then
   exit 1
 fi
 
-if [[ -n "$DOCKER_REGISTRY" ]]; then
-  DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
-fi
-
 if [[ -z "$BRANCH" ]]; then
   BRANCH="master"
 fi
@@ -100,17 +96,12 @@ if [[ "$MONOREPO" == "true" ]]; then
   MONOREPO=
   REPODIR="${REPOPATH}/*"
   
-  if [[ -z "$IMAGE_NAME" ]]; then
-    IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:{%folder%}_${BRANCH}"
-  fi
-
   for FILENAME in $REPODIR; do
     if [[ -d "${FILENAME}" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
-        IMAGE_NM="${IMAGE_NAME/\{\%folder\%\}/$FOLDER}"
         log "Building folder ${FILENAME}";
-        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} IMAGE_NAME=${IMAGE_NM} $BUILDER)
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1
@@ -170,8 +161,16 @@ fi
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 
+if [[ -n "$TAG_PREFIX" ]]; then
+  TAG_PREFIX="${TAG_PREFIX}_"
+fi
+
+if [[ -n "$DOCKER_REGISTRY" ]]; then
+  DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
+fi
+
 if [[ -z "$IMAGE_NAME" ]]; then
-  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${BRANCH}"
+  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH}"
 fi
 
 if [[ -z "$CONTEXT" ]]; then

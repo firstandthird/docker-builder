@@ -17,11 +17,6 @@ if [[ -z "$REPO" ]]; then
   exit 1
 fi
 
-if [[ -n "$DOCKER_REGISTRY" ]]; then
-  RAW_REGISTRY=$DOCKER_REGISTRY
-  DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
-fi
-
 if [[ -z "$BRANCH" ]]; then
   BRANCH="master"
 fi
@@ -106,7 +101,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         log "Building folder ${FILENAME}";
-        (DOCKER_REGISTRY=${RAW_REGISTRY} DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1
@@ -168,6 +163,10 @@ git submodule update --init --recursive
 
 if [[ -n "$TAG_PREFIX" ]]; then
   TAG_PREFIX="${TAG_PREFIX}_"
+fi
+
+if [[ -n "$DOCKER_REGISTRY" ]]; then
+  DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
 fi
 
 if [[ -z "$IMAGE_NAME" ]]; then

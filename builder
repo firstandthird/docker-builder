@@ -18,6 +18,7 @@ if [[ -z "$REPO" ]]; then
 fi
 
 if [[ -n "$DOCKER_REGISTRY" ]]; then
+  RAW_REGISTRY=$DOCKER_REGISTRY
   DOCKER_REGISTRY="${DOCKER_REGISTRY}/"
 fi
 
@@ -105,7 +106,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         log "Building folder ${FILENAME}";
-        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
+        (DOCKER_REGISTRY=${RAW_REGISTRY} DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1

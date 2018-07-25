@@ -74,6 +74,8 @@ if [[ ! -d "$REPOPATH" ]]; then
   fi
 fi
 
+cd $REPOPATH
+
 if [[ "$MONOREPO" == "true" ]]; then
   log "Building as monorepo...."
   log "pre-fetching from repo branch ${BRANCH}"
@@ -161,7 +163,6 @@ fi
 git submodule foreach "git reset --hard"
 git submodule update --init --recursive
 
-cd $REPOPATH
 COMMIT=$(git log --pretty=format:"%h" -n 1)
 
 if [[ -n "$TAG_PREFIX" ]]; then

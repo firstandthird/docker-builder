@@ -103,7 +103,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         log "Building folder ${FILENAME}";
-        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} $BUILDER)
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} SERVICE_NAME=${FOLDER} $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1
@@ -242,6 +242,14 @@ if [[ -n "$POST_HOOK" ]]; then
 fi
 
 if [[ -n "$WEBHOOK" ]]; then
+
+  # Do simple replacement for WEBHOOK_DATA using {%VAR%} replacement scheme.
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%USER\%\}/$USER}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%REPO\%\}/$REPO}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%BRANCH\%\}/$BRANCH}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%TAG_PREFIX\%\}/$TAG_PREFIX}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%SERVICE_NAME\%\}/$SERVICE_NAME}"
+
   for hook in $WEBHOOK; do
     log "triggering hook: $hook"
     curl \

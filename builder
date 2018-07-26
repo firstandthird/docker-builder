@@ -242,6 +242,15 @@ if [[ -n "$POST_HOOK" ]]; then
 fi
 
 if [[ -n "$WEBHOOK" ]]; then
+  
+  # Do simple replacement for WEBHOOK_DATA using {%VAR%} replacement scheme.
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%USER\%\}/$USER}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%REPO\%\}/$REPO}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%BRANCH\%\}/$BRANCH}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%TAG_PREFIX\%\}/$TAG_PREFIX}"
+  WEBHOOK_DATA="${WEBHOOK_DATA/\{\%FOLDER\%\}/$FOLDER}"
+
+  
   for hook in $WEBHOOK; do
     log "triggering hook: $hook"
     curl \

@@ -127,6 +127,17 @@ if [[ "$MONOREPO" == "true" ]]; then
       fi
     done
   fi
+
+  if [[ -n "$APP_BUILDER" ]]; then
+    APP_FILE_FOUND=
+    for DIR in "$REPODIR/*dockerapp"; do
+      if [ -d "$DIR" ] || [ -f "$DIR" ]; then
+        APP_FILE_FOUND="$DIR"
+        break
+      fi
+    done
+    cd $REPODIR && $APP_BUILDER --namespace $USER --tag ${FOLDER}_${BRANCH}
+  fi
   exit 0
 fi
 

@@ -136,7 +136,9 @@ if [[ "$MONOREPO" == "true" ]]; then
         break
       fi
     done
-    cd $REPODIR && $APP_BUILDER --namespace $USER --tag ${FOLDER}_${BRANCH}
+    if [[ -z $APP_FILE_FOUND ]]; then
+      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${FOLDER}_${BRANCH}
+    fi
   fi
   exit 0
 fi

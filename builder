@@ -97,7 +97,8 @@ if [[ "$MONOREPO" == "true" ]]; then
   log ""
   MONOREPO=
   REPODIR="${REPOPATH}/*"
-  
+  SKIP_DOCKERAPP=true
+
   for FILENAME in $REPODIR; do
     if [[ -d "${FILENAME}" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
@@ -253,6 +254,20 @@ if [[ -n "$POST_HOOK" ]]; then
   log "running post hook: $POST_HOOK"
   . $POST_HOOK $IMAGE_NAME
 fi
+
+if [[ -n "$APP_BUILDER" ]] && [ "$SKIP_DOCKERAPP" != "true" ]; then
+  APP_FILE_FOUND=
+  for DIR in "$REPODIR/*dockerapp"; do
+    if [ -d "$DIR" ] || [ -f "$DIR" ]; then
+      APP_FILE_FOUND="$DIR"
+      break
+    fi
+  done
+  if [[ -z $APP_FILE_FOUND ]]; then
+    $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
+  fi
+fi
+
 
 if [[ -n "$WEBHOOK" ]]; then
 

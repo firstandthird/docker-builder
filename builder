@@ -137,7 +137,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       fi
     done
     if [[ -z $APP_FILE_FOUND ]]; then
-      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${FOLDER}_${BRANCH}
+      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
     fi
   fi
   exit 0

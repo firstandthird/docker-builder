@@ -97,14 +97,13 @@ if [[ "$MONOREPO" == "true" ]]; then
   log ""
   MONOREPO=
   REPODIR="${REPOPATH}/*"
-  SKIP_DOCKERAPP=true
 
   for FILENAME in $REPODIR; do
     if [[ -d "${FILENAME}" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         log "Building folder ${FILENAME}";
-        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} SERVICE_NAME=${FOLDER} $BUILDER)
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} SERVICE_NAME=${FOLDER} SKIP_DOCKERAPP=true $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1

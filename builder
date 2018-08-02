@@ -113,6 +113,22 @@ if [[ "$MONOREPO" == "true" ]]; then
     fi
   done
 
+  if [[ -n "$APP_BUILDER" ]]; then
+    log "Looking for dockerapp"
+    APP_FILE_FOUND=
+    for DIR in "$REPODIR/*dockerapp"; do
+      if [ -d "$DIR" ] || [ -f "$DIR" ]; then
+        APP_FILE_FOUND="$DIR"
+        break
+      fi
+    done
+    if [[ -z $APP_FILE_FOUND ]]; then
+      log "Pushing dockerapp to namespace $DOCKER_REGISTRY $BRANCH"
+      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
+    fi
+    log "dockerapp complete"
+  fi
+
   if [[ -n "$WEBHOOK_MONOREPO" ]]; then
     for hook in $WEBHOOK_MONOREPO; do
       log "triggering monorepo hook: $hook"
@@ -126,19 +142,6 @@ if [[ "$MONOREPO" == "true" ]]; then
         log "!Hook errored"
       fi
     done
-  fi
-
-  if [[ -n "$APP_BUILDER" ]]; then
-    APP_FILE_FOUND=
-    for DIR in "$REPODIR/*dockerapp"; do
-      if [ -d "$DIR" ] || [ -f "$DIR" ]; then
-        APP_FILE_FOUND="$DIR"
-        break
-      fi
-    done
-    if [[ -z $APP_FILE_FOUND ]]; then
-      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
-    fi
   fi
   exit 0
 fi

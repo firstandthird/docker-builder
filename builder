@@ -281,11 +281,12 @@ if [[ -n "$WEBHOOK" ]]; then
   WEBHOOK_DATA="${WEBHOOK_DATA/\{\%SERVICE_NAME\%\}/$SERVICE_NAME}"
 
   for hook in $WEBHOOK; do
-    log "triggering hook: $hook"
+    HOOKDATA="repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&image=$IMAGE_NAME&$WEBHOOK_DATA"
+    log "triggering hook: $hook with data $HOOKDATA"
     curl \
       --fail --silent --show-error \
      -X POST \
-     -d "repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&image=$IMAGE_NAME&$WEBHOOK_DATA" \
+     -d $HOOKDATA \
      "$hook" > /dev/null
 
     if [[ "$?" != 0 ]]; then

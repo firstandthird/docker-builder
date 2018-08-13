@@ -193,7 +193,7 @@ if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH}"
 fi
 
-if [[ -n "$APPEND_COMMIT" ]]; then
+if [[ -n "$COMMIT_SUFFIX" ]]; then
   IMAGE_NAME="${IMAGE_NAME}_${COMMIT}"
 fi
 

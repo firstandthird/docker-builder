@@ -103,7 +103,7 @@ if [[ "$MONOREPO" == "true" ]]; then
       if [[ -f "${FILENAME}/${DOCKERFILE}" ]]; then
         FOLDER="${FILENAME/$REPOPATH\//}"
         log "Building folder ${FILENAME}";
-        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} SERVICE_NAME=${FOLDER} $APPEND_COMMIT $SKIP_DOCKERAPP=true $BUILDER)
+        (DOCKERFILE="${FILENAME}/${DOCKERFILE}" CONTEXT=${FILENAME} TAG_PREFIX=${FOLDER} SERVICE_NAME=${FOLDER} SKIP_DOCKERAPP=true $BUILDER)
         if [[ "$?" != 0 ]]; then
           log "There was an error building $IMAGE_NM"
           exit 1
@@ -193,7 +193,7 @@ if [[ -z "$IMAGE_NAME" ]]; then
   IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH}"
 fi
 
-if [[ -z "$APPEND_COMMIT" ]]; then
+if [[ -n "$APPEND_COMMIT" ]]; then
   IMAGE_NAME="${IMAGE_NAME}_${COMMIT}"
 fi
 

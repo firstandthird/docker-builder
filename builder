@@ -77,8 +77,8 @@ fi
 cd $REPOPATH
 
 if [[ "$MONOREPO" == "true" ]]; then
-  log "Building as monorepo...."
-  log "pre-fetching from repo branch ${BRANCH}"
+  log "Building $REPO as monorepo...."
+  log "pre-fetching from $REPO branch ${BRANCH}"
   git fetch --quiet
 
   git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
@@ -87,7 +87,7 @@ if [[ "$MONOREPO" == "true" ]]; then
     git reset --hard --quiet ${BRANCH}
   fi
   if [[ "$?" != 0 ]]; then
-    echo "error checking out $BRANCH"
+    echo "error checking out $REPO/$BRANCH"
     exit 1
   fi
 
@@ -151,18 +151,18 @@ maxattemps=10
 lockfile=build.lock
 
 while [ -f "$lockfile" ]; do
-  log "Lock file exists, waiting for previous build to finish"
+  log "Lock file exist for $REPO, waiting for previous build to finish"
   sleep 10
   attempts=$(($attempts+1))
   if [[ "$maxattempts" == "$attempts" ]]; then
-    echo "Reached max attemps, exiting"
+    echo "Reached max attemps to build $REPO/$BRANCH, exiting"
     exit 1
   fi
 done
 
 touch $lockfile
 
-log "fetching from repo branch ${BRANCH}"
+log "fetching from $REPO branch ${BRANCH}"
 git fetch --quiet
 
 git reset --hard --quiet origin/${BRANCH} > /dev/null 2>&1
@@ -171,7 +171,7 @@ if [[ "$?" != 0 ]]; then
   git reset --hard --quiet ${BRANCH}
 fi
 if [[ "$?" != 0 ]]; then
-  echo "error checking out $BRANCH"
+  echo "error checking out $REPO/$BRANCH"
   rm $lockfile
   exit 1
 fi
@@ -207,7 +207,7 @@ if [[ -n "$BEFORE" ]]; then
 
   if [[ -z "$DIFF" && "$(docker images -q $IMAGE_NAME 2> /dev/null)" != "" ]]; then
     #check if image exists, if it doesn't exist in registry, we should still build
-    echo "No difference in context and image exists"
+    echo "No difference in $REPO/$BRANCH context and image exists"
     rm $lockfile
     exit 0
   fi

@@ -285,7 +285,11 @@ if [[ -n "$WEBHOOK" ]]; then
   WEBHOOK_DATA="${WEBHOOK_DATA/\{\%SERVICE_NAME\%\}/$SERVICE_NAME}"
 
   for hook in $WEBHOOK; do
-    HOOKDATA="repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&image=$IMAGE_NAME&$WEBHOOK_DATA"
+    HOOKDATA="repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT"
+    if [[ ! $WEBHOOK_DATA =~ "image" ]]; then
+      HOOKDATA="$HOOKDATA&image=$IMAGE_NAME"
+    fi
+    HOOKDATA="$HOOKDATA&$WEBHOOK_DATA"
     log "triggering hook: $hook with data $HOOKDATA"
     curl \
       --fail --silent --show-error \

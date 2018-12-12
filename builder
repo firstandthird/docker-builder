@@ -64,6 +64,18 @@ else
   PUSH=0
 fi
 
+dockerapp() {
+  log "Looking for dockerapp"
+  for DIR in $REPOPATH/*.dockerapp; do
+    echo "$DIR"
+    if [ -d "$DIR" ] || [ -f "$DIR" ]; then
+      log "Pushing dockerapp to namespace $DOCKER_REGISTRY $BRANCH [$DIR]"
+      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH} $DIR
+    fi
+  done
+  log "dockerapp complete"
+}
+
 REPOPATH="${REPOS}/${USER}_${REPO}"
 
 if [[ ! -d "$REPOPATH" ]]; then
@@ -114,19 +126,7 @@ if [[ "$MONOREPO" == "true" ]]; then
   done
 
   if [[ -n "$APP_BUILDER" ]]; then
-    log "Looking for dockerapp"
-    APP_FILE_FOUND=
-    for DIR in "$REPODIR/*dockerapp"; do
-      if [ -d "$DIR" ] || [ -f "$DIR" ]; then
-        APP_FILE_FOUND="$DIR"
-        break
-      fi
-    done
-    if [[ -z $APP_FILE_FOUND ]]; then
-      log "Pushing dockerapp to namespace $DOCKER_REGISTRY $BRANCH"
-      $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
-    fi
-    log "dockerapp complete"
+    dockerapp
   fi
 
   if [[ -n "$WEBHOOK_MONOREPO" ]]; then
@@ -262,16 +262,7 @@ if [[ -n "$POST_HOOK" ]]; then
 fi
 
 if [[ -n "$APP_BUILDER" ]] && [ "$SKIP_DOCKERAPP" != "true" ]; then
-  APP_FILE_FOUND=
-  for DIR in "$REPODIR/*dockerapp"; do
-    if [ -d "$DIR" ] || [ -f "$DIR" ]; then
-      APP_FILE_FOUND="$DIR"
-      break
-    fi
-  done
-  if [[ -z $APP_FILE_FOUND ]]; then
-    $APP_BUILDER push --namespace $DOCKER_REGISTRY --tag ${BRANCH}
-  fi
+  dockerapp
 fi
 
 
@@ -285,7 +276,11 @@ if [[ -n "$WEBHOOK" ]]; then
   WEBHOOK_DATA="${WEBHOOK_DATA/\{\%SERVICE_NAME\%\}/$SERVICE_NAME}"
 
   for hook in $WEBHOOK; do
-    HOOKDATA="repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT&image=$IMAGE_NAME&$WEBHOOK_DATA"
+    HOOKDATA="repo=$REPO&user=$USER&branch=$BRANCH&commit=$COMMIT"
+    if [[ ! $WEBHOOK_DATA =~ "image=" ]]; then
+      HOOKDATA="$HOOKDATA&image=$IMAGE_NAME"
+    fi
+    HOOKDATA="$HOOKDATA&$WEBHOOK_DATA"
     log "triggering hook: $hook with data $HOOKDATA"
     curl \
       --fail --silent --show-error \

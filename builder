@@ -147,14 +147,14 @@ if [[ "$MONOREPO" == "true" ]]; then
 fi
 
 attempts=0
-maxattemps=10
+maxattempts=10
 lockfile=build.lock
 
 while [ -f "$lockfile" ]; do
   log "Lock file exist for $REPO, waiting for previous build to finish"
   sleep 10
   attempts=$(($attempts+1))
-  if [[ "$maxattempts" == "$attempts" ]]; then
+  if [[ $maxattempts -gt $attempts ]]; then
     echo "Reached max attemps to build $REPO/$BRANCH, exiting"
     exit 1
   fi

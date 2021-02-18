@@ -190,7 +190,7 @@ if [[ -n "$DOCKER_REGISTRY" ]]; then
 fi
 
 if [[ -z "$IMAGE_NAME" ]]; then
-  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH}"
+  IMAGE_NAME="${DOCKER_REGISTRY}${REPO}:${TAG_PREFIX}${BRANCH,,}"
 fi
 
 if [[ -n "$COMMIT_SUFFIX" ]]; then
